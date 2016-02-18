@@ -1,0 +1,14 @@
+{
+    "name": "tmarcon/scrum-sticky-notes",
+    "description": "Scrum sticky note generator",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tehem",
+            "email": "tehem@tehem.net"
+        }
+    ],
+    "require": {
+        "setasign/fpdf": "~1.8"
+    }
+}

@@ -1,0 +1,40 @@
+<?php
+/*
+ * This file is part of scrum-sticky-notes.
+ *
+ * (c) Thomas Marcon <tehem@tehem.net>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+// Minimal example
+
+// This the index of a mandatory numeric value in each valid TSV row.
+// Allow for TSV files with inconsistent rows (for example with headers, separators, empty lines...=
+$mandatoryIndex = 48;
+
+// Mapping between field and its corresponding index in the TSV file
+$dataMap = array(
+    'project'  => 0,
+    'title'    => 1,
+    'story'    => 2,
+    'BVP'      => 38,
+    'USP'      => 48,
+);
+
+// if you want colored sticky notes, you need to add following mappings
+
+// available colors you want
+$colors = array(
+    'yellow' => array(255, 255, 0),
+    'green'  => array(0, 255, 0),
+    'blue'   => array(0, 0, 255),
+);
+
+// mapping between project name (cf. 'project' field value, in lowercase) and color
+$colorMap = array(
+    'project1'  => $colors['yellow'],
+    'project2'  => $colors['green'],
+    'project3'  => $colors['blue'],
+);
