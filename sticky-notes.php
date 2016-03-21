@@ -14,31 +14,59 @@ require 'vendor/autoload.php';
 require 'config.php';
 
 // task mappings
-require 'mapping.php';
+require 'jira-config.php';
 
 /**
- * Parse TSV file and build task list
+ * @param array  $jiraConfig jira configuration
+ * @param string $sprint     current sprint number
  *
- * @param array $tsv
- * @param int   $mandatory
- * @param array $mapping
- *
- * @return array list of tasks
+ * @return array list of jira issued
  */
-function parseTsv(array $tsv, $mandatory, array $mapping)
+function getJson(array $jiraConfig, $sprint)
+{
+
+    $jql        = 'project in ('.implode(
+            ', ',
+            $jiraConfig['projects']
+        ).') AND Sprint = '.$sprint.' ORDER BY  "BV/USP" DESC';
+    $jiraApiUrl = $jiraConfig['endpoint']
+        .'/rest/api/2/search?jql=project%20in%20('.rawurlencode(implode(', ', $jiraConfig['projects'])).')'
+        .rawurlencode(' AND Sprint = \'Sprint '.$sprint.'\' ORDER BY '.$jiraConfig['orderBy']);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_USERPWD, $jiraConfig['user'].":".$jiraConfig['password']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt(
+        $ch,
+        CURLOPT_URL,
+        $jiraApiUrl
+    );
+
+    return json_decode(curl_exec($ch), true);
+}
+
+/**
+ * @param array $jiraIssues  array of jira issues
+ * @param array $jsonMapping mapping of jira fields
+ *
+ * @return array list of task for pdf output
+ */
+function parseJson(array $jiraIssues, array $jsonMapping)
 {
     $taskList = array();
 
-    foreach ($tsv as $row) {
-        $line = explode("\t", $row);
+    foreach ($jiraIssues['issues'] as $issue) {
 
-        if (!empty($line[$mandatory]) && intval($line[$mandatory]) > 0) {
-            $task = array();
-            foreach ($mapping as $data => $index) {
-                $task[$data] = $line[$index];
-            }
-            $taskList[] = $task;
+        $task            = array();
+        $task['title']   = $issue['key'];
+        $task['pid']     = $issue['fields']['project']['key'];
+        $task['project'] = $issue['fields']['project']['name'];
+
+        foreach ($jsonMapping as $data => $index) {
+            $task[$data] = $issue['fields'][$index];
         }
+
+        $taskList[] = $task;
     }
 
     return $taskList;
@@ -77,7 +105,7 @@ function exportTasks($outputPdfFile, array $tasks, $useColoredHeaders, array $co
 
             // default sticky note color (yellow!)
             $color   = array(255, 255, 0);
-            $project = strtolower($story['project']);
+            $project = $story['pid'];
 
             if ($useColoredHeaders) {
 
@@ -134,6 +162,11 @@ function exportTasks($outputPdfFile, array $tasks, $useColoredHeaders, array $co
     $pdf->output('F', $outputPdfFile.".pdf");
 }
 
-$tsvRows = file($tsvFile);
-$tasks   = parseTsv($tsvRows, $mandatoryIndex, $dataMap);
+// call JIRA API
+$json  = getJson($jiraConfig, $sprintNumber);
+
+// parse list of issues into a task array
+$tasks = parseJson($json, $jsonMap);
+
+// output sprint PDF file
 exportTasks($outputPdfFile, $tasks, $useColoredHeaders, isset($colorMap) ? $colorMap : array());

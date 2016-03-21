@@ -6,8 +6,8 @@ Little script to convert a list of tasks/user stories in a printable PDF file to
 
 ## How to use
 
-Edit `config.php` and create a `mapping.php` file (use `mapping.php.example`).
-You need to generate a tsv (Tabulation-separated value) file with all your tasks (see `config.php`).
+Edit `config.php` and create a `jira-config.php` file (use `jira-config.example.php`).
+You need to populate `jira-config.php` with your current JIRA credentials and project list.
 
 ```
 composer install

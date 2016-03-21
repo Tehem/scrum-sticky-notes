@@ -18,14 +18,9 @@
 $useColoredHeaders = true;
 
 /**
- * Input TSV file name
+ * Sprint number as specified in JIRA
  */
-$tsvFile = "jira.csv";
-
-/**
- * Optional sprint number
- */
-$sprintNumber = 36;
+$sprintNumber = 37;
 
 /**
  * Output pdf file nmae
